@@ -1,0 +1,34 @@
+import {_electron as electron} from 'playwright';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+const errors=[];
+const app=await electron.launch({...(process.env.DESKTOP_EXE?{executablePath:process.env.DESKTOP_EXE}:{args:['.']}),args:process.env.DESKTOP_EXE?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:['.','--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader'],timeout:120000});
+try{
+ const page=await app.firstWindow();page.on('pageerror',e=>errors.push(e.message));
+ await page.waitForFunction(()=>window.__community?.sunlight,{timeout:180000});
+ assert.match(page.url(),/^guanshanyue:\/\/app\//);
+ assert.equal(await page.locator('aside a').count(),0);
+ await page.locator('#buildings').selectOption('5');
+ assert.match(await page.locator('#details').innerText(),/10 个完整楼层/);
+ await page.locator('#walk').click();
+ assert(await page.evaluate(()=>window.__community.walk.active));
+ const before=await page.evaluate(()=>window.__community.camera.position.toArray());
+ await page.keyboard.down('w');await page.waitForTimeout(1200);await page.keyboard.up('w');
+ const after=await page.evaluate(()=>window.__community.camera.position.toArray());
+ assert(Math.hypot(after[0]-before[0],after[2]-before[2])>.1);assert.equal(after[1],2.2);
+ assert(await page.locator('.walk-map').isVisible());
+ await page.keyboard.press('Escape');assert(!await page.evaluate(()=>window.__community.walk.active));
+ const security=await page.evaluate(async()=>({node:typeof window.require,network:await fetch('https://example.com').then(()=>true,()=>false),model:!!window.__community.model}));
+ assert.equal(security.node,'undefined');assert.equal(security.network,false);assert(security.model);
+ await page.locator('#sun-enabled').check();
+ await page.locator('#sun-date').fill('2026-12-22');await page.locator('#sun-date').dispatchEvent('change');
+ await page.locator('#sun-time').fill('720');await page.locator('#sun-time').dispatchEvent('input');
+ const altitude=await page.evaluate(()=>window.__community.sunlight.position.altitude);assert(altitude>28&&altitude<32);
+ await page.locator('#sun-play').click();
+ const stop=await page.evaluate(()=>{const api=window.__community.sunlight;api.tick(10000000);api.tick(10100000);const el=document.querySelector('#sun-time');return {time:el.value,max:el.max,label:document.querySelector('#sun-play').textContent};});
+ assert.equal(stop.time,stop.max);assert.equal(stop.label,'播放日出至日落');
+ assert.deepEqual(errors,[]);
+ await fs.mkdir('test-results',{recursive:true});
+ await page.screenshot({path:'test-results/desktop.png'});
+ console.log(JSON.stringify({offlineModel:true,networkBlocked:true,building6:true,winterAltitude:altitude,stopsAtSunset:true,errors},null,2));
+}finally{await app.close();}

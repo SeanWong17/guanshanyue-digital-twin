@@ -15,6 +15,14 @@
 
 鼠标左键拖动旋转，右键拖动平移，滚轮缩放；触屏单指旋转、双指平移和缩放。
 
+## Windows 桌面版
+
+从 [GitHub Releases](https://github.com/SeanWong17/guanshanyue-digital-twin/releases/latest) 下载 Windows 10/11 x64 安装包 `.exe`，或下载 `.zip` 完整解压后启动 `Guanshanyue.exe`。内置模型，离线可用。安装包未签名，Windows 可能提示未知发布者。
+
+点击“进入小区漫游”，使用 WASD / 方向键行走、Shift 加速，拖动视野转头，Esc 退出。手机可使用屏幕方向按钮和滑动转头。小地图实时显示位置与朝向。视线高为地面以上 1.7 米，楼体轮廓阻挡穿行；目前为地面漫游，不支持上下楼或驶入地下车库。
+
+开发桌面版：`npm run desktop`。在 Windows 上执行 `npm run build`、`npm run package:win` 生成安装包和免安装 ZIP。推送版本标签自动构建、静默安装并验收桌面包，通过后发布 Release。
+
 ## 本地运行
 
 需要 Node.js 22 或更新版本。
