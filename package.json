@@ -1,0 +1,21 @@
+{
+  "name": "guanshanyue-digital-twin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5189",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node scripts/check_solar.mjs",
+    "test:browser": "node scripts/check_preview.mjs"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0",
+    "vite": "^6.4.3"
+  }
+}
